@@ -36,10 +36,10 @@ export default function SingleNewsArticle() {
   }, [params.id]);
 
   if (loading) {
-    return (
-      
+return (
+      <div className="min-h-screen flex items-center justify-center text-xl font-bold text-[#11235A]">
         Loading Article...
-      
+      </div>
     );
   }
 
