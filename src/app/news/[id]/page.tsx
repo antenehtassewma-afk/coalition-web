@@ -44,11 +44,13 @@ return (
   }
 
   if (!article) {
-    return (
-      
-        Article Not Found
-        ← Back to News Feed
-      
+  return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center">
+        <h1 className="text-3xl font-bold text-[#11235A] mb-4">Article Not Found</h1>
+        <a href="/news" className="text-blue-600 font-bold hover:underline">
+          ← Back to News Feed
+        </a>
+      </div>
     );
   }
 
