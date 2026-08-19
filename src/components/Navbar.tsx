@@ -31,14 +31,14 @@ export default function Navbar() {
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
             DONATE
           </Link>
-        <div className="flex items-center space-x-3">
-  <Link 
-    href="/pledge" 
-    className="hidden md:inline-block bg-white text-[#11235A] font-bold py-2 px-5 rounded-lg border-2 border-[#11235A] hover:bg-gray-50 transition-colors"
-  >
-    Pledge
-  </Link>
-</div>
+          <div className="flex items-center space-x-3">
+            <Link 
+              href="/pledge" 
+              className="hidden md:inline-block bg-white text-[#11235A] font-bold py-2 px-5 rounded-lg border-2 border-[#11235A] hover:bg-gray-50 transition-colors"
+            >
+              Pledge
+            </Link>
+          </div>
         </div>
 
         {/* Mobile Hamburger Button */}
@@ -61,7 +61,7 @@ export default function Navbar() {
             <li className="cursor-pointer hover:text-[#136B32] transition-colors"><Link href="/">HOME</Link></li>
             <li className="cursor-pointer hover:text-[#136B32] transition-colors"><Link href="/about">ABOUT US</Link></li>
 
-            {/* Hover Dropdown (Now includes Gallery) */}
+            {/* Hover Dropdown */}
             <li className="relative group cursor-pointer hover:text-[#136B32] transition-colors">
               <div className="flex items-center gap-1 pb-1">
                 NEWS & EVENTS
@@ -89,11 +89,7 @@ export default function Navbar() {
               </div>
             </li>
 
-            {/* <li className="cursor-pointer hover:text-[#136B32] transition-colors"><Link href="/register">MEMBERSHIP</Link></li> */}
-          {/* The clean Gateway Link */}
-<Link href="/join" className="cursor-pointer hover:text-[#136B32] transition-colors">
-  Join Us
-</Link>
+            <Link href="/join" className="cursor-pointer hover:text-[#136B32] transition-colors">Join Us</Link>
             <li className="cursor-pointer hover:text-[#136B32] transition-colors"><Link href="/get-involved">GET INVOLVED</Link></li>
             <li className="cursor-pointer hover:text-[#136B32] transition-colors"><Link href="/contact">CONTACT US</Link></li>
           </ul>
@@ -105,30 +101,21 @@ export default function Navbar() {
         <div className="md:hidden bg-white border-t border-gray-200 shadow-xl absolute w-full z-40">
           <ul className="flex flex-col text-[14px] font-extrabold text-[#11235A] uppercase tracking-widest divide-y divide-gray-100">
             <li><Link href="/" className="block py-4 px-6 hover:bg-gray-50" onClick={() => setIsOpen(false)}>HOME</Link></li>
-            <li><Link href="/about" onClick={() => setIsOpen(false)} className="block py-4 px-6 hover:bg-gray-50" onClick={() => setIsOpen(false)}>ABOUT US</Link></li>
-            {/* Mobile links grouped together */}
-            <li><Link href="/news" onClick={() => setIsOpen(false)} className="block py-4 px-6 hover:bg-gray-50 text-[#136B32]" onClick={() => setIsOpen(false)}>NEWS</Link></li>
-            <li><Link href="/events" onClick={() => setIsOpen(false)} className="block py-4 px-6 hover:bg-gray-50 text-[#136B32]" onClick={() => setIsOpen(false)}>EVENTS</Link></li>
-            <li><Link href="/gallery" onClick={() => setIsOpen(false)} className="block py-4 px-6 hover:bg-gray-50 text-[#136B32]" onClick={() => setIsOpen(false)}>GALLERY</Link></li>
+            <li><Link href="/about" className="block py-4 px-6 hover:bg-gray-50" onClick={() => setIsOpen(false)}>ABOUT US</Link></li>
             
-            <li><Link href="/get-involved" onClick={() => setIsOpen(false)} className="block py-4 px-6 hover:bg-gray-50" onClick={() => setIsOpen(false)}>GET INVOLVED</Link></li>
-            <li><Link href="/contact" onClick={() => setIsOpen(false)} className="block py-4 px-6 hover:bg-gray-50" onClick={() => setIsOpen(false)}>CONTACT US</Link></li>
+            <li><Link href="/news" className="block py-4 px-6 hover:bg-gray-50 text-[#136B32]" onClick={() => setIsOpen(false)}>NEWS</Link></li>
+            <li><Link href="/events" className="block py-4 px-6 hover:bg-gray-50 text-[#136B32]" onClick={() => setIsOpen(false)}>EVENTS</Link></li>
+            <li><Link href="/gallery" className="block py-4 px-6 hover:bg-gray-50 text-[#136B32]" onClick={() => setIsOpen(false)}>GALLERY</Link></li>
+            
+            <li><Link href="/get-involved" className="block py-4 px-6 hover:bg-gray-50" onClick={() => setIsOpen(false)}>GET INVOLVED</Link></li>
+            <li><Link href="/contact" className="block py-4 px-6 hover:bg-gray-50" onClick={() => setIsOpen(false)}>CONTACT US</Link></li>
             
             <li className="p-6 bg-gray-50 flex flex-col gap-3">
-              <Link href="/donate" onClick={() => setIsOpen(false)} className="bg-[#136B32] text-white px-6 py-3 rounded-md text-sm font-bold flex items-center justify-center gap-2 shadow-sm w-full" onClick={() => setIsOpen(false)}>DONATE</Link>
-              {/* <Link href="/register" className="bg-[#FFC000] text-[#11235A] px-5 py-3 rounded-md text-sm font-bold flex items-center justify-center gap-2 shadow-sm w-full text-center" onClick={() => setIsOpen(false)}>REGISTER / BECOME A MEMBER</Link> */}
+              <Link href="/donate" className="bg-[#136B32] text-white px-6 py-3 rounded-md text-sm font-bold flex items-center justify-center gap-2 shadow-sm w-full" onClick={() => setIsOpen(false)}>DONATE</Link>
+              <Link href="/join" className="bg-[#11235A] text-white px-6 py-3 rounded-md text-sm font-bold flex items-center justify-center gap-2 shadow-sm w-full" onClick={() => setIsOpen(false)}>JOIN THE COALITION</Link>
+              <Link href="/pledge" className="bg-white border-2 border-[#11235A] text-[#11235A] px-6 py-3 rounded-md text-sm font-bold flex items-center justify-center gap-2 shadow-sm w-full" onClick={() => setIsOpen(false)}>PLEDGE</Link>
             </li>
           </ul>
-          <Link 
-    href="/join" onClick={() => setIsOpen(false)}
-    className="block w-full text-center bg-gray-100 text-[#11235A] font-bold py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors"
-  >
-    Join the Coalition
-  </Link>
-
-<Link href="/pledge" onClick={() => setIsOpen(false)} className="block w-full text-center bg-gray-100 text-[#11235A] font-bold py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors">
-  Pledge
-</Link>
         </div>
       )}
     </>
