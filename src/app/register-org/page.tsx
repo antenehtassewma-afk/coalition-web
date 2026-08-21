@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
-
+import emailjs from "@emailjs/browser";
 export default function RegisterOrgPage() {
   // NEW: Track which step of the process the organization is on
   const [step, setStep] = useState(1);
@@ -18,28 +18,43 @@ export default function RegisterOrgPage() {
     message: ""
   });
 
-  const handleRegistrationSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus("sending");
+ const handleRegistrationSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setStatus("sending");
 
-    try {
-      // 1. Save to Firebase first (so we don't lose them if they close the window)
-      const regRef = collection(db, "registrations");
-      await addDoc(regRef, {
-        ...formData,
-        submittedAt: new Date(),
-        status: "pending_payment"
-      });
+  try {
+    // 1. Save to Firebase first
+    const regRef = collection(db, "registrations");
+    await addDoc(regRef, {
+      ...formData,
+      submittedAt: new Date(),
+      status: "pending_payment"
+    });
 
-      // 2. Instead of redirecting to a new URL, we just flip the view to Step 2!
-      setStep(2);
-      setStatus("idle"); // Reset status for the payment phase
+    // 2. NEW: Fire the EmailJS Admin Notification
+    await emailjs.send(
+      'service_b89yzbu', 
+      'template_ydgkgcq', 
+      {
+        registration_type: formData.membershipType,
+        name: formData.organizationName,
+        email: formData.email,
+        phone: formData.phone,
+        extra_details: `Contact Person: ${formData.contactName}\nMessage: ${formData.message}`
+      }, 
+      '8AyYvWD6B6YNYm1tI'
+    );
+    console.log("Admin email sent successfully.");
 
-    } catch (error) {
-      console.error("Error registering organization: ", error);
-      setStatus("error");
-    }
-  };
+    // 3. Flip the view to Step 2 (Payment Screen)
+    setStep(2);
+    setStatus("idle"); 
+
+  } catch (error) {
+    console.error("Error registering organization: ", error);
+    setStatus("error");
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 py-16">
@@ -120,6 +135,29 @@ export default function RegisterOrgPage() {
               <button className="w-full p-4 bg-[#0070ba] text-white rounded font-bold hover:bg-[#005ea6] transition-colors">
                 pay with PayPal
               </button>
+              {/* MANUAL PAYMENT OPTIONS */}
+<div className="mt-8 pt-8 border-t border-gray-200">
+  <h3 className="text-xl font-bold text-[#11235A] mb-4">Alternative Payment Options</h3>
+  <p className="text-gray-600 mb-6 text-sm">
+    Prefer not to pay online? Your information is securely saved in our system. 
+    You can submit your payment manually, and our team will approve your account.
+  </p>
+  
+  <div className="bg-gray-50 p-6 rounded-lg text-left border border-gray-200 text-sm space-y-4">
+    <div className="flex items-center gap-3">
+      <span className="text-xl">📱</span>
+      <p><strong className="text-gray-900">Zelle:</strong> payments@coalitiondomain.org</p>
+    </div>
+    <div className="flex items-center gap-3">
+      <span className="text-xl">💲</span>
+      <p><strong className="text-gray-900">Cash App:</strong> $CAAA_Official</p>
+    </div>
+    <div className="flex items-center gap-3">
+      <span className="text-xl">✉️</span>
+      <p><strong className="text-gray-900">Check:</strong> Mail to 4390 King Street, Alexandria, VA 22302</p>
+    </div>
+  </div>
+</div>
             </div>
           </div>
         )}

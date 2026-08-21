@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import PaymentTracker from "@/components/PaymentTracker"; // Fixed: Capitalized for React component
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function AdminDashboard() {
     return () => unsubscribe();
   }, [router]);
 
- const handleLogout = async () => {
+  const handleLogout = async () => {
     try {
       await signOut(auth);
       setIsAuthorized(false); // Instantly lock the screen
@@ -45,8 +46,10 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Increased max-w to 7xl to give the table plenty of room on desktop */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
+        {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 border-b border-gray-200 pb-6">
           <div>
             <h1 className="text-3xl font-extrabold text-gray-900">Admin Command Center</h1>
@@ -60,6 +63,14 @@ export default function AdminDashboard() {
           </button>
         </div>
 
+        {/* NEW: LIVE PAYMENT TRACKER SECTION */}
+        <div className="mb-12">
+          <PaymentTracker />
+        </div>
+
+        {/* EXISTING: QUICK MANAGEMENT LINKS */}
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b border-gray-200 pb-2">Quick Management</h2>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
           {/* Manage News */}

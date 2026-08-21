@@ -1,5 +1,5 @@
 "use client";
-
+import emailjs from '@emailjs/browser';
 import { useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
@@ -17,32 +17,43 @@ export default function RegisterPage() {
 
   const [status, setStatus] = useState("idle"); 
 
- const handleRegistrationSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus("sending");
+const handleRegistrationSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setStatus("sending");
 
-    try {
-      const registrationsRef = collection(db, "registrations");
-      await addDoc(registrationsRef, {
-        fullName: formData.fullName,
+  try {
+    // 1. Save the data to Firebase First
+    const regRef = collection(db, "registrations");
+    await addDoc(regRef, {
+      ...formData,
+      submittedAt: new Date(),
+      status: "pending_payment"
+    });
+
+    // 2. Fire the EmailJS Notification
+    await emailjs.send(
+      'service_b89yzbu', 
+      'template_ydgkgcq', 
+      {
+        registration_type: "Individual Member",
+        name: formData.fullName, 
         email: formData.email,
-        phone: formData.phone,
-        membershipType: formData.membershipType,
-        
-        // THE FIX: Changed 'joinedAt' to 'submittedAt' so the Admin Dashboard can see it!
-        submittedAt: new Date(), 
-        
-        status: "pending_payment" 
-      });
+        phone: formData.phone, // Fixed to match your state
+        extra_details: `Membership Tier: ${formData.membershipType}` // Swapped city/state for Membership Tier
+      }, 
+      '8AyYvWD6B6YNYm1tI'
+    );
+    console.log("Admin notification sent successfully.");
 
-      setStep(2); 
-      setStatus("idle"); 
+    // 3. Flip the view to Step 2 (Payment Screen)
+    setStep(2);
+    setStatus("idle"); 
 
-    } catch (error) {
-      console.error("Error registering: ", error);
-      setStatus("error");
-    }
-  };
+  } catch (error) {
+    console.error("Error registering member:", error);
+    setStatus("error");
+  }
+};
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -131,6 +142,29 @@ export default function RegisterPage() {
             <button className="w-full p-4 bg-[#0070ba] text-white rounded font-bold hover:bg-[#005ea6] transition-colors">
               pay with PayPal
             </button>
+            {/* MANUAL PAYMENT OPTIONS */}
+<div className="mt-8 pt-8 border-t border-gray-200">
+  <h3 className="text-xl font-bold text-[#11235A] mb-4">Alternative Payment Options</h3>
+  <p className="text-gray-600 mb-6 text-sm">
+    Prefer not to pay online? Your information is securely saved in our system. 
+    You can submit your payment manually, and our team will approve your account.
+  </p>
+  
+  <div className="bg-gray-50 p-6 rounded-lg text-left border border-gray-200 text-sm space-y-4">
+    <div className="flex items-center gap-3">
+      <span className="text-xl">📱</span>
+      <p><strong className="text-gray-900">Zelle:</strong> payments@coalitiondomain.org</p>
+    </div>
+    <div className="flex items-center gap-3">
+      <span className="text-xl">💲</span>
+      <p><strong className="text-gray-900">Cash App:</strong> $CAAA_Official</p>
+    </div>
+    <div className="flex items-center gap-3">
+      <span className="text-xl">✉️</span>
+      <p><strong className="text-gray-900">Check:</strong> Mail to 4390 King Street, Alexandria, VA 22302</p>
+    </div>
+  </div>
+</div>
           </div>
         </div>
       )}
