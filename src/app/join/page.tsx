@@ -16,10 +16,11 @@ export default function JoinPage() {
     email: "",
     phone: "",
     organizationName: "",
+    representativeName: "",
   });
 
   const paymentOptions = [
-    { id: "stripe", label: "Credit Card", icon: "💳" },
+    { id: "stripe", label: "stripe", icon: "💳" },
     { id: "paypal", label: "PayPal", icon: "🅿️" },
     { id: "cashapp", label: "Cash App", icon: "💚" },
     { id: "zelle", label: "Zelle", icon: "🏦" },
@@ -33,12 +34,16 @@ export default function JoinPage() {
     try {
       const registrationsRef = collection(db, "registrations");
       await addDoc(registrationsRef, {
-        ...formData,
         membershipType,
+        organizationName: membershipType === "Partner Organization" ? formData.organizationName : "",
+        representativeName: membershipType === "Partner Organization" ? formData.representativeName : "",
+        fullName: membershipType === "Individual Member" ? formData.fullName : "",
+        email: formData.email,
+        phone: formData.phone,
         paymentMethod,
         paymentReference: paymentReference || "None",
         submittedAt: new Date(),
-        status: "Pending" // Registrations start as pending review/fulfillment
+        status: "Pending"
       });
 
       setStatus("success");
@@ -97,17 +102,24 @@ export default function JoinPage() {
               {/* 2. Contact Information */}
               <h3 className="text-xl font-bold text-gray-900 mb-4">2. Contact Information</h3>
               <div className="space-y-4 mb-8">
-                {membershipType === "Partner Organization" && (
+                {membershipType === "Partner Organization" ? (
+                  <>
+                    <div>
+                      <label className="block text-gray-700 text-sm font-bold mb-2">Organization Name *</label>
+                      <input required type="text" className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700" value={formData.organizationName} onChange={(e) => setFormData({...formData, organizationName: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 text-sm font-bold mb-2">Representative Name *</label>
+                      <input required type="text" className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700" value={formData.representativeName} onChange={(e) => setFormData({...formData, representativeName: e.target.value})} />
+                    </div>
+                  </>
+                ) : (
                   <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2">Organization Name *</label>
-                    <input required type="text" className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700" value={formData.organizationName} onChange={(e) => setFormData({...formData, organizationName: e.target.value})} />
+                    <label className="block text-gray-700 text-sm font-bold mb-2">Full Name *</label>
+                    <input required type="text" className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
                   </div>
                 )}
 
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">Full Name / Representative *</label>
-                  <input required type="text" className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
-                </div>
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-2">Email Address *</label>
                   <input required type="email" className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
