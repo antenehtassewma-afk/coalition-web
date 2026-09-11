@@ -1,4 +1,4 @@
-import React = require("react");
+import React from "react"; // ✅ Modern ECMAScript style
 
 // 1. YOUR REAL DATA: Each organization has its own unique name and web address
 const uniquePartners = [
