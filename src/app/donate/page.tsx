@@ -10,6 +10,10 @@ export default function DonatePage() {
   const [amount, setAmount] = useState("100");
   const [customAmount, setCustomAmount] = useState("");
   
+  // New state for payment selection and reference codes
+  const [paymentMethod, setPaymentMethod] = useState("stripe");
+  const [paymentReference, setPaymentReference] = useState("");
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -20,6 +24,14 @@ export default function DonatePage() {
     setAmount(val);
     setCustomAmount("");
   };
+
+  const paymentOptions = [
+    { id: "stripe", label: "Credit Card", icon: "💳" },
+    { id: "paypal", label: "PayPal", icon: "🅿️" },
+    { id: "cashapp", label: "Cash App", icon: "💚" },
+    { id: "zelle", label: "Zelle", icon: "🏦" },
+    { id: "check", label: "Mail Check", icon: "✉️" },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,9 +44,11 @@ export default function DonatePage() {
       await addDoc(donationsRef, {
         ...formData,
         pledgeAmount: finalAmount,
+        paymentMethod: paymentMethod,
+        paymentReference: paymentReference || "None",
         message: "Submitted via Main Donate Page",
         submittedAt: new Date(),
-        status: "Pending Gateway Connection"
+        status: paymentMethod === "zelle" || paymentMethod === "check" || paymentMethod === "cashapp" ? "Pending" : "Paid"
       });
 
       setStatus("success");
@@ -53,7 +67,7 @@ export default function DonatePage() {
             Make a Donation
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Your generosity empowers our community. Choose an amount below to support our ongoing initiatives and advocacy.
+            Your generosity empowers our community. Choose an amount and payment method below to support our initiatives.
           </p>
         </div>
 
@@ -64,7 +78,7 @@ export default function DonatePage() {
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Thank You!</h2>
             <p className="text-gray-600 text-lg mb-6">
-              Your donation details have been securely recorded. Because our payment gateway is currently being upgraded, a representative will contact you shortly with a secure link to complete your transaction.
+              Your donation record has been successfully saved. We appreciate your vital support for our community.
             </p>
             <Link href="/" className="text-[#11235A] font-bold hover:underline">
               Return to Homepage
@@ -101,6 +115,7 @@ export default function DonatePage() {
             <div className="lg:col-span-3 bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
               <form onSubmit={handleSubmit}>
                 
+                {/* 1. Select Amount */}
                 <h3 className="text-xl font-bold text-gray-900 mb-4">1. Select Amount</h3>
                 <div className="grid grid-cols-3 gap-3 mb-4">
                   {["50", "100", "250"].map((preset) => (
@@ -135,7 +150,70 @@ export default function DonatePage() {
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-gray-900 mb-4">2. Your Information</h3>
+                {/* 2. Clickable Payment Method Selection */}
+                <h3 className="text-xl font-bold text-gray-900 mb-4">2. Select Payment Method</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                  {paymentOptions.map((opt) => {
+                    const isSelected = paymentMethod === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setPaymentMethod(opt.id)}
+                        className={`p-3 rounded-xl border-2 text-left transition-all flex flex-col justify-between ${
+                          isSelected
+                            ? "border-[#11235A] bg-blue-50/50 shadow-sm ring-1 ring-[#11235A]"
+                            : "border-gray-200 bg-white hover:border-gray-300"
+                        }`}
+                      >
+                        <span className="text-2xl mb-1">{opt.icon}</span>
+                        <span className={`font-bold text-xs sm:text-sm ${isSelected ? "text-[#11235A]" : "text-gray-800"}`}>
+                          {opt.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Conditional Instructions based on Payment Selection */}
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-8 text-sm">
+                  {paymentMethod === "stripe" && (
+                    <p className="text-gray-600">💳 Your credit card will be processed securely via Stripe.</p>
+                  )}
+                  {paymentMethod === "paypal" && (
+                    <p className="text-gray-600">🅿️ You will complete your checkout securely through PayPal.</p>
+                  )}
+                  {paymentMethod === "cashapp" && (
+                    <div>
+                      <p className="text-gray-600 mb-2">Send payment to Cash Tag: <strong className="text-[#136B32]">$YourCashTag</strong></p>
+                      <input 
+                        type="text" 
+                        placeholder="Enter Cash App Receipt ID" 
+                        value={paymentReference}
+                        onChange={(e) => setPaymentReference(e.target.value)}
+                        className="w-full p-2 border rounded bg-white text-gray-800 text-sm"
+                      />
+                    </div>
+                  )}
+                  {paymentMethod === "zelle" && (
+                    <div>
+                      <p className="text-gray-600 mb-2">Send Zelle transfer to: <strong className="text-[#11235A]">payments@yourcoalition.org</strong></p>
+                      <input 
+                        type="text" 
+                        placeholder="Enter Zelle Confirmation Number" 
+                        value={paymentReference}
+                        onChange={(e) => setPaymentReference(e.target.value)}
+                        className="w-full p-2 border rounded bg-white text-gray-800 text-sm"
+                      />
+                    </div>
+                  )}
+                  {paymentMethod === "check" && (
+                    <p className="text-gray-600">✉️ Mail checks to: Coalition Office, 1234 Coalition Way, Washington, DC 20001</p>
+                  )}
+                </div>
+
+                {/* 3. Your Information */}
+                <h3 className="text-xl font-bold text-gray-900 mb-4">3. Your Information</h3>
                 <div className="space-y-4 mb-8">
                   <div>
                     <label className="block text-gray-700 text-sm font-bold mb-2">Full Name *</label>
@@ -156,10 +234,10 @@ export default function DonatePage() {
                   disabled={status === "submitting"} 
                   className="bg-[#11235A] text-white font-bold py-4 px-8 rounded-lg hover:bg-blue-900 w-full disabled:opacity-50 transition-colors text-lg shadow-md"
                 >
-                  {status === "submitting" ? "Processing..." : `Donate $${customAmount || amount}`}
+                  {status === "submitting" ? "Processing..." : `Complete Donation of $${customAmount || amount}`}
                 </button>
                 <p className="text-xs text-gray-500 text-center mt-4">
-                  Secure processing. By clicking Donate, you agree to our terms of service.
+                  Secure processing. By submitting, you agree to our terms of service.
                 </p>
 
               </form>

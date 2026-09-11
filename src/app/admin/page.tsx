@@ -6,11 +6,31 @@ import { useRouter } from "next/navigation";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import PaymentTracker from "@/components/PaymentTracker"; // Fixed: Capitalized for React component
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase"; // Make sure db is imported
+
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
 
+  // 1. Create the role variable that was missing
+  const [role, setRole] = useState<string | null>(null);
+
+  // 2. Fetch the user's role from Firestore when the page loads
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user && user.uid) {
+        const roleDocRef = doc(db, "admin_users", user.uid); 
+        const roleDoc = await getDoc(roleDocRef);
+        
+        if (roleDoc.exists()) {
+          setRole(roleDoc.data().role); 
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
   // The "Bouncer": Checks if you are truly logged in before showing the page
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -132,6 +152,21 @@ export default function AdminDashboard() {
               View Pledges
             </Link>
           </div>
+          
+          {/* Link component needed at the top of your file: import Link from "next/link"; */}
+
+{role === "SuperAdmin" && (
+  <Link href="/admin/manage-admins" className="block p-6 bg-white rounded-lg shadow border-2 border-red-200 hover:border-red-400 transition-all">
+    <div className="flex items-center justify-between mb-2">
+      <h2 className="text-xl font-bold text-red-700">Manage Admins</h2>
+      <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-bold">SuperAdmin Only</span>
+    </div>
+    <p className="text-sm text-gray-600 mb-4">Grant or revoke dashboard access for coalition staff.</p>
+    <div className="inline-block bg-red-700 text-white px-4 py-2 rounded text-sm font-bold">
+      Open Roster
+    </div>
+  </Link>
+)}
 
         </div>
 

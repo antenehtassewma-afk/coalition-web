@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PartnersLinks from "@/components/PartnersLinks"; // 1. Import the component
 
 export default function AboutPage() {
   return (
@@ -65,7 +66,7 @@ export default function AboutPage() {
         </div>
 
         {/* Call to Action */}
-        <div className="text-center bg-white border border-gray-200 rounded-2xl p-10">
+        <div className="text-center bg-white border border-gray-200 rounded-2xl p-10 mb-16">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Want to be part of the movement?</h2>
           <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
             Whether you are representing an organization or joining as an individual, your voice matters. Connect with us today.
@@ -76,6 +77,11 @@ export default function AboutPage() {
           >
             Become a Member
           </Link>
+        </div>
+
+        {/* 2. Partners Directory placed right before the end */}
+        <div className="mt-12">
+          <PartnersLinks />
         </div>
 
       </div>

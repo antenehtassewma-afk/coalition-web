@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { db, auth } from "@/lib/firebase"; 
-import { collection, getDocs, deleteDoc, doc, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -40,13 +40,24 @@ export default function AdminMembershipsPage() {
       setApplications(liveApps);
     } catch (error) {
       console.error("Error fetching applications:", error);
-      // Fallback if index isn't built yet
       try {
         const fallbackSnapshot = await getDocs(collection(db, "registrations"));
         setApplications(fallbackSnapshot.docs.map(d => ({ id: d.id, ...d.data() })));
       } catch (e) {}
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Quick Action: Toggle Payment Status (e.g., mark Zelle/Check as Paid)
+  const handleStatusToggle = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === "Paid" ? "Pending" : "Paid";
+    try {
+      await updateDoc(doc(db, "registrations", id), { status: newStatus });
+      setApplications(applications.map(app => app.id === id ? { ...app, status: newStatus } : app));
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("Failed to update payment status.");
     }
   };
 
@@ -68,12 +79,12 @@ export default function AdminMembershipsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-10">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Membership Applications</h1>
-            <p className="text-gray-600 mt-2">Review submissions from both Individuals and Partner Organizations.</p>
+            <p className="text-gray-600 mt-2">Review submissions, member details, and payment tracking across all methods.</p>
           </div>
           <Link href="/admin" className="text-[#11235A] font-bold hover:underline">
             ← Back to Dashboard
@@ -82,7 +93,7 @@ export default function AdminMembershipsPage() {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-yellow-50 border-b border-gray-200 p-6 flex justify-between items-center">
-            <h2 className="text-xl font-bold text-gray-900">Pending & Approved Members</h2>
+            <h2 className="text-xl font-bold text-gray-900">All Submissions</h2>
             <span className="bg-yellow-200 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full uppercase">
               {applications.length} Total
             </span>
@@ -102,24 +113,26 @@ export default function AdminMembershipsPage() {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant Info</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Details</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type / Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Status</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {applications.map((app) => {
-                    // 1. STRICT CHECK: Is this definitely an Organization?
                     const isOrg = app.membershipType === "Partner Organization";
-                    
-                    // 2. ORG DATA: Fallbacks for older test data
                     const displayOrgName = app.organizationName || app.organization || "Organization Name Missing";
                     const displayRepName = app.contactName || "Rep Name Missing";
-                    
-                    // 3. INDIVIDUAL DATA: Catch fullName, name, or first/last combos
                     const displayIndName = app.fullName || app.name || (app.firstName ? `${app.firstName} ${app.lastName || ''}`.trim() : "Name Missing");
 
-                    // 4. STATUS: Catch both spelling variations
-                    const isPending = app.status === "pending_payment" || app.status === "Pending Payment" || !app.status;
+                    // Clean label for payment methods
+                    const paymentMethodLabel = app.paymentMethod === "stripe" ? "💳 Credit Card" :
+                                               app.paymentMethod === "paypal" ? "🅿️ PayPal" :
+                                               app.paymentMethod === "cashapp" ? "💚 Cash App" :
+                                               app.paymentMethod === "zelle" ? "🏦 Zelle" :
+                                               app.paymentMethod === "check" ? "✉️ Mail Check" : "Not Specified";
+
+                    const currentStatus = app.status || "Pending";
 
                     return (
                       <tr key={app.id} className="hover:bg-gray-50">
@@ -141,12 +154,26 @@ export default function AdminMembershipsPage() {
                           <div className="text-sm text-gray-500">{app.phone || "No Phone"}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-green-100 text-green-800 uppercase">
-                            {app.membershipType || "Standard"}
-                          </span>
-                          <div className="text-xs text-gray-500 mt-1 ml-1 font-medium">
-                            {isPending ? "🟡 Pending Payment" : `🟢 ${app.status}`}
-                          </div>
+                          <div className="text-sm font-semibold text-gray-800">{paymentMethodLabel}</div>
+                          {/* Display Cash App / Zelle transaction reference ID if submitted */}
+                          {app.paymentReference && (
+                            <div className="text-xs text-gray-500 mt-1 font-mono bg-gray-100 p-1 rounded">
+                              Ref: {app.paymentReference}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <button
+                            onClick={() => handleStatusToggle(app.id, currentStatus)}
+                            className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full transition-all ${
+                              currentStatus === "Paid" 
+                                ? "bg-green-100 text-green-800 hover:bg-green-200" 
+                                : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                            }`}
+                            title="Click to toggle status between Paid and Pending"
+                          >
+                            {currentStatus === "Paid" ? "🟢 Paid" : "🟡 Pending"}
+                          </button>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button 

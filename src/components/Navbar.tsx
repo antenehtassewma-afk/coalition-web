@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import GoogleTranslate from './GoogleTranslate';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,9 +15,16 @@ export default function Navbar() {
         
         {/* Logo & Text */}
         <div className="flex items-center gap-4 md:gap-6">
-          <div className="w-16 h-16 md:w-24 md:h-24  rounded-full border-2 border-yellow-500 flex items-center justify-center bg-gray-50 overflow-hidden relative shadow-sm shrink-0">
-             <Image src="/coalition-amhara.jpeg" alt="CAAA Logo" fill className="object-contain p-2" />
-          </div>
+<div className="flex items-center">
+  <Image
+  src="/coalition-amhara.jpeg"
+  alt="Coalition Logo"
+  width={100}
+  height={50}
+  style={{ width: "auto", height: "auto" }} // Satisfies Next.js aspect ratio check
+  priority
+/>
+</div>
           <div>
             <h1 className="text-3xl md:text-5xl font-extrabold text-[#11235A] tracking-wide mb-1">CAAA</h1>
             <p className="hidden sm:block text-[12px] md:text-[15px] font-bold text-gray-800 uppercase tracking-wider leading-tight">
@@ -40,6 +48,7 @@ export default function Navbar() {
             </Link>
           </div>
         </div>
+   <GoogleTranslate/>
 
         {/* Mobile Hamburger Button */}
         <button 

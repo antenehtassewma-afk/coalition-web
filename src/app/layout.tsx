@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Navbar from '@/components/Navbar'; // We import your new component here!
 import Link from "next/link";
+import GoogleTranslate from '@/components/GoogleTranslate'; // Import the Google Translate component
 export const metadata: Metadata = {
   title: 'CAAA - Coalition of Amhara Associations in America',
   description: 'Uniting Amhara associations and organizations in America.',
@@ -18,6 +19,8 @@ export default function RootLayout({
         
         {/* We use your new Navbar component right here! */}
         <Navbar />
+        <GoogleTranslate/>
+        
 
         {/* --- DYNAMIC PAGE CONTENT --- */}
         <main className="flex-grow">
@@ -37,6 +40,7 @@ export default function RootLayout({
               <Link href="/admin" className="text-xs text-gray-400 hover:text-white transition-colors">
                 Admin Access
               </Link>
+               
             </div>
 
           </div>

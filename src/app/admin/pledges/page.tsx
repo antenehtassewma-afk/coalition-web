@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db, auth } from "@/lib/firebase"; // We imported auth here!
-import { collection, getDocs, deleteDoc, doc, query, orderBy } from "firebase/firestore";
+import { db, auth } from "@/lib/firebase"; 
+import { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -46,6 +46,18 @@ export default function AdminPledgesPage() {
     }
   };
 
+  // Quick Action: Toggle Payment Status (e.g., mark Zelle/Check as Paid)
+  const handleStatusToggle = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === "Paid" ? "Pending" : "Paid";
+    try {
+      await updateDoc(doc(db, "pledges", id), { status: newStatus });
+      setPledges(pledges.map(p => p.id === id ? { ...p, status: newStatus } : p));
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("Failed to update payment status.");
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this record?")) return;
 
@@ -65,12 +77,12 @@ export default function AdminPledgesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-10">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Donations & Pledges</h1>
-            <p className="text-gray-600 mt-2">Review financial support submitted from the public site.</p>
+            <p className="text-gray-600 mt-2">Review financial support, selected payment methods, and bank transfer verifications.</p>
           </div>
           <Link href="/admin" className="text-[#11235A] font-bold hover:underline">
             ← Back to Dashboard
@@ -79,7 +91,7 @@ export default function AdminPledgesPage() {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-green-50 border-b border-gray-200 p-6 flex justify-between items-center">
-            <h2 className="text-xl font-bold text-gray-900">Pending Financial Support</h2>
+            <h2 className="text-xl font-bold text-gray-900">Financial Support Records</h2>
             <span className="bg-green-200 text-green-800 text-xs font-bold px-3 py-1 rounded-full uppercase">
               {pledges.length} Total
             </span>
@@ -97,23 +109,36 @@ export default function AdminPledgesPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Donor Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Donor Info</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {pledges.map((record) => {
                     const isDonation = record.message === "Submitted via Main Donate Page";
+                    
+                    // Clean format for payment choices
+                    const paymentMethodLabel = record.paymentMethod === "stripe" ? "💳 Credit Card" :
+                                               record.paymentMethod === "paypal" ? "🅿️ PayPal" :
+                                               record.paymentMethod === "cashapp" ? "💚 Cash App" :
+                                               record.paymentMethod === "zelle" ? "🏦 Zelle" :
+                                               record.paymentMethod === "check" ? "✉️ Mail Check" : "Not Specified";
+
+                    const currentStatus = record.status || "Pending";
 
                     return (
                       <tr key={record.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-bold text-gray-900">{record.fullName}</div>
+                          <div className="text-xs text-gray-500 mt-0.5">
+                            {isDonation ? "Donation" : "Pledge"}
+                          </div>
                           {record.message && !isDonation && (
-                            <div className="text-xs text-gray-500 truncate max-w-[200px]">{record.message}</div>
+                            <div className="text-xs text-gray-400 truncate max-w-[180px] mt-1">{record.message}</div>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -121,20 +146,31 @@ export default function AdminPledgesPage() {
                           <div className="text-sm text-gray-500">{record.phone}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {isDonation ? (
-                            <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-blue-100 text-blue-800">
-                              Donation (Pending)
-                            </span>
-                          ) : (
-                            <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-purple-100 text-purple-800">
-                              Future Pledge
-                            </span>
+                          <div className="text-sm font-semibold text-gray-800">{paymentMethodLabel}</div>
+                          {/* Shows Zelle or Cash App reference numbers if provided */}
+                          {record.paymentReference && (
+                            <div className="text-xs text-gray-500 mt-1 font-mono bg-gray-100 p-1 rounded inline-block">
+                              Ref: {record.paymentReference}
+                            </div>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="px-3 py-1 inline-flex text-sm leading-5 font-bold rounded-full bg-green-100 text-green-800">
                             ${record.pledgeAmount}
                           </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <button
+                            onClick={() => handleStatusToggle(record.id, currentStatus)}
+                            className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full transition-all ${
+                              currentStatus === "Paid" 
+                                ? "bg-green-100 text-green-800 hover:bg-green-200" 
+                                : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                            }`}
+                            title="Click to toggle status between Paid and Pending"
+                          >
+                            {currentStatus === "Paid" ? "🟢 Paid" : "🟡 Pending"}
+                          </button>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button 

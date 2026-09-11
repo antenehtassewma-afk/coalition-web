@@ -24,3 +24,43 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+
+
+
+/* 1. Hides the Google Translate top banner *//* 1. Hides the top banner and prevents page push-down */
+.skiptranslate > iframe.skiptranslate {
+  display: none !important;
+  visibility: hidden !important;
+}
+body {
+  top: 0px !important;
+}
+
+/* 2. Strip all text and images from the main widget container */
+.goog-te-gadget {
+  font-size: 0px !important;
+  color: transparent !important;
+}
+
+/* 3. Aggressively hide the dynamically injected "Powered by" spans and links */
+.goog-te-gadget span, 
+.goog-te-gadget a,
+.goog-te-gadget-icon,
+.goog-logo-link {
+  display: none !important;
+}
+
+/* 4. Force ONLY the dropdown menu to stay visible */
+.goog-te-gadget .goog-te-combo {
+  display: inline-block !important;
+  font-size: 14px !important;
+  color: #11235A !important;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  outline: none;
+  background-color: white;
+  margin: 0 !important;
+}
