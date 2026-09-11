@@ -16,7 +16,6 @@ export default function JoinPage() {
     email: "",
     phone: "",
     organizationName: "",
-    contactName: "",
   });
 
   const paymentOptions = [
@@ -39,7 +38,7 @@ export default function JoinPage() {
         paymentMethod,
         paymentReference: paymentReference || "None",
         submittedAt: new Date(),
-        status: paymentMethod === "zelle" || paymentMethod === "check" || paymentMethod === "cashapp" ? "Pending" : "Paid"
+        status: "Pending" // Registrations start as pending review/fulfillment
       });
 
       setStatus("success");
@@ -58,7 +57,7 @@ export default function JoinPage() {
             Join the Coalition
           </h1>
           <p className="text-xl text-gray-600">
-            Register as an Individual Member or a Partner Local Organization.
+            Register as an Individual Member or a Partner Organization.
           </p>
         </div>
 
@@ -99,25 +98,16 @@ export default function JoinPage() {
               <h3 className="text-xl font-bold text-gray-900 mb-4">2. Contact Information</h3>
               <div className="space-y-4 mb-8">
                 {membershipType === "Partner Organization" && (
-                  <>
-                    <div>
-                      <label className="block text-gray-700 text-sm font-bold mb-2">Organization Name *</label>
-                      <input required type="text" className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700" value={formData.organizationName} onChange={(e) => setFormData({...formData, organizationName: e.target.value})} />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 text-sm font-bold mb-2">Representative Name *</label>
-                      <input required type="text" className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
-                    </div>
-                  </>
-                )}
-
-                {membershipType === "Individual Member" && (
                   <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2">Full Name *</label>
-                    <input required type="text" className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
+                    <label className="block text-gray-700 text-sm font-bold mb-2">Organization Name *</label>
+                    <input required type="text" className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700" value={formData.organizationName} onChange={(e) => setFormData({...formData, organizationName: e.target.value})} />
                   </div>
                 )}
 
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">Full Name / Representative *</label>
+                  <input required type="text" className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
+                </div>
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-2">Email Address *</label>
                   <input required type="email" className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
