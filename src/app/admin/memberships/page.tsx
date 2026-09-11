@@ -121,7 +121,7 @@ export default function AdminMembershipsPage() {
                   {applications.map((app) => {
                     const isOrg = app.membershipType === "Partner Organization";
                     const displayOrgName = app.organizationName || app.organization || "Organization Name Missing";
-                    const displayRepName = app.representativeName || app.fullName || app.repName || app.contactName || app.name || app.contactPerson || "Rep Name Missing";
+                   const displayRepName = app.contactName || app.representativeName || app.fullName || "Rep Name Missing";
                     const displayIndName = app.fullName || app.name || "Name Missing";
 
                     // Clean label for payment methods
