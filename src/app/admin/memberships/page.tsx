@@ -49,7 +49,6 @@ export default function AdminMembershipsPage() {
     }
   };
 
-  // Quick Action: Toggle Payment Status (e.g., mark Zelle/Check as Paid)
   const handleStatusToggle = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === "Paid" ? "Pending" : "Paid";
     try {
@@ -122,15 +121,16 @@ export default function AdminMembershipsPage() {
                   {applications.map((app) => {
                     const isOrg = app.membershipType === "Partner Organization";
                     const displayOrgName = app.organizationName || app.organization || "Organization Name Missing";
-                    const displayRepName = app.contactName || "Rep Name Missing";
-                    const displayIndName = app.fullName || app.name || (app.firstName ? `${app.firstName} ${app.lastName || ''}`.trim() : "Name Missing");
+                    const displayRepName = app.representativeName || app.fullName || "Rep Name Missing";
+                    const displayIndName = app.fullName || app.name || "Name Missing";
 
                     // Clean label for payment methods
-                    const paymentMethodLabel = app.paymentMethod === "stripe" ? "💳 Credit Card" :
-                                               app.paymentMethod === "paypal" ? "🅿️ PayPal" :
-                                               app.paymentMethod === "cashapp" ? "💚 Cash App" :
-                                               app.paymentMethod === "zelle" ? "🏦 Zelle" :
-                                               app.paymentMethod === "check" ? "✉️ Mail Check" : "Not Specified";
+                    const paymentMethodLabel = 
+                      app.paymentMethod === "stripe" ? "💳 stripe" :
+                      app.paymentMethod === "paypal" ? "🅿️ PayPal" :
+                      app.paymentMethod === "cashapp" ? "💚 Cash App" :
+                      app.paymentMethod === "zelle" ? "🏦 Zelle" :
+                      app.paymentMethod === "check" ? "✉️ Mail Check" : "Not Specified";
 
                     const currentStatus = app.status || "Pending";
 
@@ -155,8 +155,7 @@ export default function AdminMembershipsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-semibold text-gray-800">{paymentMethodLabel}</div>
-                          {/* Display Cash App / Zelle transaction reference ID if submitted */}
-                          {app.paymentReference && (
+                          {app.paymentReference && app.paymentReference !== "None" && (
                             <div className="text-xs text-gray-500 mt-1 font-mono bg-gray-100 p-1 rounded">
                               Ref: {app.paymentReference}
                             </div>
