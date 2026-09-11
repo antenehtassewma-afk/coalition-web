@@ -1,5 +1,3 @@
-import React from "react"; // ✅ Modern ECMAScript style
-
 // 1. YOUR REAL DATA: Each organization has its own unique name and web address
 const uniquePartners = [
   { id: 1, name: "Atlanta Amhara Community", websiteUrl: "https://example.com" },
@@ -21,7 +19,7 @@ export default function PartnersLinks() {
           </p>
         </div>
 
-        {/* 2. THE TEMPLATE: React loops through your unique list automatically */}
+        {/* The Template: React loops through your unique list automatically */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {uniquePartners.map((partner) => (
             <a
