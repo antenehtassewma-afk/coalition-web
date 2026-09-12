@@ -48,7 +48,7 @@ export default function DonatePage() {
         paymentReference: paymentReference || "None",
         message: "Submitted via Main Donate Page",
         submittedAt: new Date(),
-        status: paymentMethod === "zelle" || paymentMethod === "check" || paymentMethod === "cashapp" ? "Pending" : "Paid"
+        status: "Pending" // Forces ALL methods (including Stripe & PayPal) to start as Pending for admin review
       });
 
       setStatus("success");
