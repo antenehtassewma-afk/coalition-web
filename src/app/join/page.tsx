@@ -49,20 +49,20 @@ export default function RegisterOrgPage() {
     setStatus("sending");
 
     try {
-      // 1. Save initial fields to Firebase
+      // 1. Save all fields to Firebase with "pending" status and initial payment info
       const regRef = collection(db, "registrations");
       const docRef = await addDoc(regRef, {
         ...formData,
         representativeName: formData.contactName, 
-        paymentMethod: "stripe",
-        paymentReference: "None",
+        paymentMethod: paymentMethod, // Saves the clicked payment choice (stripe, paypal, zelle, etc.)
+        paymentReference: paymentReference || "None",
         submittedAt: new Date(),
-        status: "Pending"
+        status: "Pending" // All registrations start as pending for admin review
       });
 
       setDocId(docRef.id);
 
-      // 2. Fire the EmailJS Admin Notification
+      // 2. Fire the EmailJS Admin Notification with expanded organization details
       await emailjs.send(
         'service_b89yzbu', 
         'template_ydgkgcq', 
@@ -71,12 +71,13 @@ export default function RegisterOrgPage() {
           name: formData.organizationName,
           email: formData.email,
           phone: formData.phone,
-          extra_details: `Contact: ${formData.contactName} (${formData.title})\nType: ${formData.orgType}\nMission: ${formData.mission}\nInterests: ${formData.participationAreas.join(', ')}\nReason: ${formData.reasonForJoining}`
+          payment_method: paymentMethod.toUpperCase(),
+          extra_details: `Contact: ${formData.contactName} (${formData.title})\nType: ${formData.orgType}\nMission: ${formData.mission}\nInterests: ${formData.participationAreas.join(', ')}\nPayment Method: ${paymentMethod}\nReference: ${paymentReference || 'N/A'}`
         }, 
         '8AyYvWD6B6YNYm1tI'
       );
 
-      // 3. Flip to Payment Screen
+      // 3. Flip to Payment Screen or Success
       setStep(2);
       setStatus("idle"); 
 

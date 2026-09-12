@@ -121,12 +121,12 @@ export default function AdminMembershipsPage() {
                   {applications.map((app) => {
                     const isOrg = app.membershipType === "Partner Organization";
                     const displayOrgName = app.organizationName || app.organization || "Organization Name Missing";
-                   const displayRepName = app.contactName || app.representativeName || app.fullName || "Rep Name Missing";
+                    const displayRepName = app.contactName || app.representativeName || app.fullName || "Rep Name Missing";
                     const displayIndName = app.fullName || app.name || "Name Missing";
 
                     // Clean label for payment methods
                     const paymentMethodLabel = 
-                      app.paymentMethod === "stripe" ? "💳 stripe" :
+                      app.paymentMethod === "stripe" ? "💳 Credit Card" :
                       app.paymentMethod === "paypal" ? "🅿️ PayPal" :
                       app.paymentMethod === "cashapp" ? "💚 Cash App" :
                       app.paymentMethod === "zelle" ? "🏦 Zelle" :
@@ -139,7 +139,23 @@ export default function AdminMembershipsPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           {isOrg ? (
                             <>
-                              <div className="text-sm font-bold text-[#11235A]">🏢 {displayOrgName}</div>
+                              <div>
+                                {app.website ? (
+                                  <a 
+                                    href={app.website.startsWith('http') ? app.website : `https://${app.website}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-sm font-bold text-[#11235A] hover:underline flex items-center gap-1"
+                                    title="Click to visit organization website"
+                                  >
+                                    🏢 {displayOrgName} 🔗
+                                  </a>
+                                ) : (
+                                  <span className="text-sm font-bold text-[#11235A]">
+                                    🏢 {displayOrgName}
+                                  </span>
+                                )}
+                              </div>
                               <div className="text-xs text-gray-500 mt-1">Rep: {displayRepName}</div>
                             </>
                           ) : (

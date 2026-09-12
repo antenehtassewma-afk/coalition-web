@@ -103,45 +103,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      {/* COALITION MEMBERS LOGO GRID */}
-<section className="py-16 bg-white border-t border-gray-200">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-    <h2 className="text-2xl font-extrabold text-[#11235A] mb-10 tracking-wide uppercase">
-      Our Coalition Members
-    </h2>
-    
-    {/* 
-      Grid adjusts automatically: 2 columns on mobile, 3 on tablets, 5 on desktops.
-      The grayscale effect neutralizes clashing brand colors until hovered.
-    */}
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center justify-items-center opacity-80 grayscale hover:grayscale-0 transition-all duration-300">
-      
-      {/* UPDATE THESE SRC PATHS ONCE LOGOS ARE RECEIVED */}
-      <img src="/logos/placeholder-1.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-2.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-3.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-4.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-5.png" alt="Coalition Member" className="h-16 object-contain" />
-       <img src="/logos/placeholder-1.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-2.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-3.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-4.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-5.png" alt="Coalition Member" className="h-16 object-contain" />
-       <img src="/logos/placeholder-1.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-2.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-3.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-4.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-5.png" alt="Coalition Member" className="h-16 object-contain" />
-       <img src="/logos/placeholder-1.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-2.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-3.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-4.png" alt="Coalition Member" className="h-16 object-contain" />
-      <img src="/logos/placeholder-5.png" alt="Coalition Member" className="h-16 object-contain" />
-      
-    </div>
-  </div>
-</section>
-
-    </div>
+</div>
   );
 }
