@@ -5,13 +5,14 @@ import { db } from "@/lib/firebase";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // Added router
 
 export default function RegisterOrgPage() {
+  const router = useRouter(); // Initialize router
   const [step, setStep] = useState(1);
   const [status, setStatus] = useState("idle");
   const [docId, setDocId] = useState<string | null>(null);
 
-  // Added state hooks at the top level to fix reference errors
   const [paymentMethod, setPaymentMethod] = useState("stripe");
   const [paymentReference, setPaymentReference] = useState("");
 
@@ -49,20 +50,20 @@ export default function RegisterOrgPage() {
     setStatus("sending");
 
     try {
-      // 1. Save all fields to Firebase with "pending" status and initial payment info
+      // 1. Save to Firebase
       const regRef = collection(db, "registrations");
       const docRef = await addDoc(regRef, {
         ...formData,
         representativeName: formData.contactName, 
-        paymentMethod: paymentMethod, // Saves the clicked payment choice (stripe, paypal, zelle, etc.)
+        paymentMethod: paymentMethod, 
         paymentReference: paymentReference || "None",
         submittedAt: new Date(),
-        status: "Pending" // All registrations start as pending for admin review
+        status: "Pending"
       });
 
       setDocId(docRef.id);
 
-      // 2. Fire the EmailJS Admin Notification with expanded organization details
+      // 2. EmailJS Notification
       await emailjs.send(
         'service_b89yzbu', 
         'template_ydgkgcq', 
@@ -77,7 +78,7 @@ export default function RegisterOrgPage() {
         '8AyYvWD6B6YNYm1tI'
       );
 
-      // 3. Flip to Payment Screen or Success
+      // 3. Flip to Payment Screen
       setStep(2);
       setStatus("idle"); 
 
@@ -99,8 +100,8 @@ export default function RegisterOrgPage() {
         console.error("Error updating payment info:", err);
       }
     }
-    alert("Payment choice recorded successfully! Your organization's membership application is pending review.");
-    setStep(3); // or redirect to success page
+    // Redirect to coming soon page instead of showing alert and step 3
+    router.push("/coming-soon"); 
   };
 
   return (
@@ -246,7 +247,7 @@ export default function RegisterOrgPage() {
           </>
         )}
 
-        {/* STEP 2: PAYMENT SCREEN */}
+        {/* STEP 2: PAYMENT SCREEN - SHRUNK & REDIRECT ADDED */}
         {step === 2 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 md:p-12 max-w-3xl mx-auto">
             <div className="text-center mb-8">
@@ -257,7 +258,7 @@ export default function RegisterOrgPage() {
             </div>
 
             {/* Payment Method Selector Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
               {[
                 { id: "stripe", label: "Credit Card", icon: "💳" },
                 { id: "paypal", label: "PayPal", icon: "🅿️" },
@@ -271,12 +272,12 @@ export default function RegisterOrgPage() {
                     key={opt.id}
                     type="button"
                     onClick={() => setPaymentMethod(opt.id)}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${
-                      isSelected ? "border-[#11235A] bg-blue-50/50 shadow-sm" : "border-gray-200 bg-white"
+                    className={`p-2 rounded-lg border-2 flex items-center space-x-2 transition-all ${
+                      isSelected ? "border-[#11235A] bg-blue-50/50 shadow-sm ring-1 ring-[#11235A]" : "border-gray-200 bg-white hover:border-gray-300"
                     }`}
                   >
-                    <span className="text-2xl mb-1 block">{opt.icon}</span>
-                    <span className={`font-bold text-xs sm:text-sm ${isSelected ? "text-[#11235A]" : "text-gray-800"}`}>
+                    <span className="text-lg">{opt.icon}</span>
+                    <span className={`font-bold text-xs ${isSelected ? "text-[#11235A]" : "text-gray-800"}`}>
                       {opt.label}
                     </span>
                   </button>
@@ -285,17 +286,24 @@ export default function RegisterOrgPage() {
             </div>
 
             {/* Manual Payment Instructions & Reference Input */}
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-sm space-y-4 mb-8">
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm space-y-4 mb-8">
               <h3 className="font-bold text-[#11235A] text-base">Payment Details & Instructions</h3>
-              <p className="text-gray-600">
-                Please complete your transfer using one of the options below. Your registration details are saved securely.
-              </p>
               
-              <div className="space-y-2 text-gray-700">
-                <p><strong>Zelle:</strong> payments@coalitiondomain.org</p>
-                <p><strong>Cash App:</strong> $CAAA_Official</p>
-                <p><strong>Check:</strong> Mail to 4390 King Street, Alexandria, VA 22302</p>
-              </div>
+              {paymentMethod === "stripe" && (
+                <p className="text-gray-600">💳 Secure credit card processing is coming soon.</p>
+              )}
+              {paymentMethod === "paypal" && (
+                <p className="text-gray-600">🅿️ PayPal checkout integration is coming soon.</p>
+              )}
+              {paymentMethod === "cashapp" && (
+                <p className="text-gray-600"><strong>Cash App:</strong> Send to $CAAA_Official</p>
+              )}
+              {paymentMethod === "zelle" && (
+                <p className="text-gray-600"><strong>Zelle:</strong> Send to payments@coalitiondomain.org</p>
+              )}
+              {paymentMethod === "check" && (
+                <p className="text-gray-600"><strong>Check:</strong> Mail to 4390 King Street, Alexandria, VA 22302</p>
+              )}
 
               <div className="pt-2">
                 <label className="block text-gray-700 font-bold mb-1 text-xs uppercase">Confirmation / Reference Number (If paying via Zelle/Cash App)</label>
@@ -304,7 +312,7 @@ export default function RegisterOrgPage() {
                   placeholder="Enter transaction reference ID" 
                   value={paymentReference}
                   onChange={(e) => setPaymentReference(e.target.value)}
-                  className="w-full p-3 border rounded bg-white text-gray-800 outline-none focus:border-[#11235A]"
+                  className="w-full p-2 border rounded-lg bg-white text-gray-800 outline-none focus:border-[#11235A] focus:ring-1 focus:ring-[#11235A]"
                 />
               </div>
             </div>
@@ -312,23 +320,11 @@ export default function RegisterOrgPage() {
             <div className="flex gap-4">
               <button 
                 onClick={handleFinalPaymentConfirm}
-                className="bg-[#136B32] text-white font-bold py-4 px-8 rounded-lg hover:bg-green-800 w-full transition-colors text-lg shadow-md"
+                className="bg-[#136B32] text-white font-bold py-3 px-8 rounded-lg hover:bg-green-800 w-full transition-colors text-lg shadow-md"
               >
                 Confirm Payment & Submit
               </button>
             </div>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Registration Complete!</h2>
-            <p className="text-gray-600 mb-6">
-              Your organization's application has been received and logged successfully. Our team will review your details and payment reference shortly.
-            </p>
-            <Link href="/" className="inline-block bg-[#11235A] text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-900 transition-colors">
-              Return to Homepage
-            </Link>
           </div>
         )}
 
